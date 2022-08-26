@@ -1,4 +1,4 @@
-package Koha::Plugin::Com::ByWaterSolutions::MessageBee;
+package Koha::Plugin::Com::ByWaterSolutions::Itiva;
 
 ## It's good practice to use Modern::Perl
 use Modern::Perl;
@@ -28,7 +28,7 @@ our $VERSION         = "{VERSION}";
 our $MINIMUM_VERSION = "{MINIMUM_VERSION}";
 
 our $metadata = {
-    name            => 'Unique Management Services - MessageBee',
+    name            => 'Unique Management Services - Itiva',
     author          => 'Kyle M Hall',
     date_authored   => '2021-09-20',
     date_updated    => "1900-01-01",
@@ -36,7 +36,7 @@ our $metadata = {
     maximum_version => undef,
     version         => $VERSION,
     description     =>
-      'Plugin to forward messages to MessageBee for processing and sending',
+      'Plugin to forward messages to Itiva for processing and sending',
 };
 
 =head3 new
@@ -142,7 +142,7 @@ in process_message_queue.pl
 sub before_send_messages {
     my ( $self, $params ) = @_;
 
-    logaction( 'CRONJOBS', 'Start', 'MessageBee::before_send_messages', encode_json({ pid => $$ }) );
+    logaction( 'CRONJOBS', 'Start', 'Itiva::before_send_messages', encode_json({ pid => $$ }) );
 
     my $archive_dir = $ENV{MESSAGEBEE_ARCHIVE_PATH};
     my $test_mode = $ENV{MESSAGEBEE_TEST_MODE};
@@ -173,13 +173,13 @@ sub before_send_messages {
 
     my $search_params = {
         status => 'pending',
-        content => { -like => '%messagebee: yes%' },
+        content => { -like => '%itiva: yes%' },
     };
 
     say "SEARCH PARAMETERS: " . Data::Dumper::Dumper( $search_params ) if $verbose;
     if ( $params->{type} ) {
-        if ( $params->{type} eq 'messagebee' ) {
-            # Do nothing, process all messagebee messages, but Koha will not do any processing itself
+        if ( $params->{type} eq 'itiva' ) {
+            # Do nothing, process all itiva messages, but Koha will not do any processing itself
         } else {
             $search_params->{message_transport_type} = $params->{type};
         }
@@ -227,8 +227,8 @@ sub before_send_messages {
 
                     next unless $yaml;
                     next unless ref $yaml eq 'HASH';
-                    next unless $yaml->{messagebee};
-                    next unless $yaml->{messagebee} eq 'yes';
+                    next unless $yaml->{itiva};
+                    next unless $yaml->{itiva} eq 'yes';
 
                     $messages_seen->{ $m->message_id } = 1;
 
@@ -424,7 +424,7 @@ sub before_send_messages {
     if (@message_data) {
         my $dev_version = '{' . 'VERSION' . '}'; # Prevents substitution
         my $v = $VERSION eq $dev_version ? "DEVELOPMENT VERSION" : $VERSION;
-        my $json = encode_json( { json_structure_version => '2', messagebee_plugin_version => $v, messages => \@message_data } );
+        my $json = encode_json( { json_structure_version => '2', itiva_plugin_version => $v, messages => \@message_data } );
 
         my $library_name = C4::Context->preference('LibraryName');
         $library_name =~ s/ /_/g;
@@ -462,48 +462,7 @@ sub before_send_messages {
         }
     }
 
-    logaction( 'CRONJOBS', 'End', 'MessageBee::before_send_messages', encode_json({ pid => $$, filename => $filename, results => $results }) );
-}
-
-sub scrub_biblio {
-    my ( $self, $biblio ) = @_;
-
-    delete $biblio->{abstract};
-
-    return $biblio;
-}
-
-sub scrub_patron {
-    my ( $self, $patron ) = @_;
-
-    delete $patron->{password};
-    delete $patron->{borrowernotes};
-
-    return $patron;
-}
-
-sub scrub_message {
-    my ( $self, $message ) = @_;
-
-    delete $message->{content};
-    delete $message->{metadata};
-
-    return $message;
-}
-
-sub api_routes {
-    my ( $self, $args ) = @_;
-
-    my $spec_str = $self->mbf_read('openapi.json');
-    my $spec     = decode_json($spec_str);
-
-    return $spec;
-}
-
-sub api_namespace {
-    my ($self) = @_;
-
-    return 'messagebee';
+    logaction( 'CRONJOBS', 'End', 'Itiva::before_send_messages', encode_json({ pid => $$, filename => $filename, results => $results }) );
 }
 
 1;

@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0] - 2022-05-19
 - Add patron/account_balance to the JSON data
-- Wrap most logic in try/catch to keep crashes from allowing messagebee yaml to be emailed by Koha
+- Wrap most logic in try/catch to keep crashes from allowing itiva yaml to be emailed by Koha
 
 ## [3.0.0] - 2022-05-19
 - Update JSON data structure
